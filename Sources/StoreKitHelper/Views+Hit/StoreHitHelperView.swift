@@ -51,17 +51,17 @@ public struct StoreHitHelperView: View {
 
                 VStack(alignment: .leading, spacing: 0) {
                     ZStack {
-                        vipViewRive.view().padding(50)
-                        confettiViewRive.view()
+                        self.vipViewRive.view().padding(50)
+                        self.confettiViewRive.view()
                     }
-                    if store.hasNotPurchased {
+                    if self.store.hasNotPurchased {
                         VStack(spacing: .zero) {
                             TermsOfServiceView()
                             VStack {
-                                ProductsLoadList(loading: $loadingProducts) {
+                                ProductsLoadList(loading: self.$loadingProducts) {
                                     ProductsListView(
-                                        buyingProductID: $buyingProductID,
-                                        loading: $loadingProducts
+                                        buyingProductID: self.$buyingProductID,
+                                        loading: self.$loadingProducts
                                     )
                                     .filteredProducts { productID, product in
                                         if let filteredProducts = viewModel.filteredProducts {
@@ -69,7 +69,7 @@ public struct StoreHitHelperView: View {
                                         }
                                         return true
                                     }
-                                    .disabled(restoringPurchase)
+                                    .disabled(self.restoringPurchase)
                                 }
                             }.padding(10)
                             Spacer(minLength: .zero)
@@ -83,9 +83,9 @@ public struct StoreHitHelperView: View {
                                 .foregroundStyle(.gray.opacity(0.75))
                                 Spacer(minLength: .zero)
 
-                                RestorePurchasesButtonView(restoringPurchase: $restoringPurchase)
-                                    .disabled(buyingProductID != nil)
-                                    .foregroundColor(primaryColor)
+                                RestorePurchasesButtonView(restoringPurchase: self.$restoringPurchase)
+                                    .disabled(self.buyingProductID != nil)
+                                    .foregroundColor(self.primaryColor)
                                     .padding(.vertical)
                             }
                             .padding(.horizontal, 4)
@@ -93,7 +93,7 @@ public struct StoreHitHelperView: View {
                         .frame(alignment: .bottom)
                         .background(
                             LinearGradient(colors: [
-                                primaryColor.opacity(0),
+                                self.primaryColor.opacity(0),
                                 .black
                             ], startPoint: .top, endPoint: .bottom)
                         )
@@ -117,11 +117,11 @@ public struct StoreHitHelperView: View {
 //                }
             }
         }
-        .if(closeBtn) {
+        .if(self.closeBtn) {
             $0.overlay(alignment: .top) {
                 HStack {
                     Spacer(minLength: .zero)
-                    Button { dismiss() } label: {
+                    Button { self.dismiss() } label: {
                         Image(systemName: "xmark.circle.fill")
                             .symbolRenderingMode(.hierarchical)
                             .foregroundStyle(.white)
@@ -141,7 +141,7 @@ public struct StoreHitHelperView: View {
 
         var body: some View {
             Color.clear
-                .overlay(Image(image, bundle: .module)
+                .overlay(Image(self.image, bundle: .module)
                     .resizable()
                     .aspectRatio(contentMode: .fill))
                 .clipped()
@@ -157,5 +157,11 @@ extension View {
         } else {
             self
         }
+    }
+}
+
+public extension StoreContext {
+    func askPurchased(_ action: () -> Void = {}) {
+        if self.hasNotPurchased { action() }
     }
 }
