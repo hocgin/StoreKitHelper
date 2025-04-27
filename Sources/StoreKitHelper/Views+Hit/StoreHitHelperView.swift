@@ -88,6 +88,7 @@ public struct StoreHitHelperView: View {
                                     .foregroundColor(self.primaryColor)
                                     .padding(.vertical)
                             }
+                            .padding(.top, 4)
                             .padding(.horizontal, 4)
                         }
                         .frame(alignment: .bottom)
@@ -101,20 +102,6 @@ public struct StoreHitHelperView: View {
 //                        ExpiredDateView(expirationDate: expirationDate)
                     }
                 }
-//                .if(self.closeBtn) {
-//                    $0.overlay(alignment: .top) {
-//                        HStack {
-//                            Spacer(minLength: .zero)
-//                            Button { dismiss() } label: {
-//                                Image(systemName: "xmark.circle.fill")
-//                                    .symbolRenderingMode(.hierarchical)
-//                                    .foregroundStyle(.white)
-//                                    .imageScale(.large)
-//                            }
-//                        }
-//                        .padding()
-//                    }
-//                }
             }
         }
         .if(self.closeBtn) {
@@ -130,6 +117,20 @@ public struct StoreHitHelperView: View {
                 }
                 .padding()
             }
+        }
+        .onChange(of: self.store.hasNotPurchased) { hasNotPurchased in
+            self.triggerConfetti(hasNotPurchased)
+        }
+        .onAppear {
+            self.triggerConfetti(self.store.hasNotPurchased)
+        }
+    }
+
+    func triggerConfetti(_ hasNotPurchased: Bool) {
+        if hasNotPurchased {
+            self.confettiViewRive.stop()
+        } else {
+            self.confettiViewRive.play()
         }
     }
 
