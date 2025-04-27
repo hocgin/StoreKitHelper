@@ -11,7 +11,7 @@ let package = Package(
         .macOS(.v14),
         .tvOS(.v15),
         .watchOS(.v8),
-        .visionOS(.v1)
+        .visionOS(.v1),
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
@@ -20,15 +20,20 @@ let package = Package(
             targets: ["StoreKitHelper"]
         ),
     ],
+    dependencies: [
+        .package(url: "https://github.com/rive-app/rive-ios", from: "6.5.6"),
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "StoreKitHelper",
+            dependencies: [
+                .product(name: "RiveRuntime", package: "rive-ios"),
+            ],
             resources: [
-                .process("Resources")
+                .process("Resources"),
             ]
         ),
-
     ]
 )

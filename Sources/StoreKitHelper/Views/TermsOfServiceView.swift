@@ -8,10 +8,11 @@
 import SwiftUI
 
 // MARK: 服务条款 & 隐私政策
+
 struct TermsOfServiceView: View {
     @Environment(\.termsOfServiceHandle) private var termsOfServiceHandle
     @Environment(\.privacyPolicyHandle) private var privacyPolicyHandle
-    
+
     @Environment(\.termsOfServiceLabel) private var termsOfServiceLabel
     @Environment(\.privacyPolicyLabel) private var privacyPolicyLabel
     @Environment(\.locale) var locale

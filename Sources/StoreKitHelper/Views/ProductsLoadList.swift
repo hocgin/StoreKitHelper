@@ -5,8 +5,8 @@
 //  Created by wong on 3/28/25.
 //
 
-import SwiftUI
 import StoreKit
+import SwiftUI
 
 /// 用户更新产品列表
 public struct ProductsLoadList<Content: View>: View {
@@ -19,13 +19,15 @@ public struct ProductsLoadList<Content: View>: View {
         self._loading = loading
         self.content = content
     }
+
     var content: () -> Content
     public var body: some View {
         VStack(spacing: 0) {
             if loading == .unavailable {
                 ProductsUnavailableView(error: $error)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(.background.opacity(0.73))
+                    .background(.background.opacity(0.45))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
                     .padding(8)
             } else if products.count > 0 {
                 content()
@@ -41,22 +43,23 @@ public struct ProductsLoadList<Content: View>: View {
             }
         })
         .frame(minHeight: CGFloat(store.productIds.count) * 12)
-        .onChange(of: products, initial: false, { old, val in
+        .onChange(of: products, initial: false) { _, _ in
             if products.count > 0 {
                 let productIdSet = Set(store.productIds)
                 /// 根据 id 进行排序
                 store.products = products.filter { productIdSet.contains($0.id) }
                     .sorted {
                         if let index1 = store.productIds.firstIndex(of: $0.id),
-                           let index2 = store.productIds.firstIndex(of: $1.id) {
+                           let index2 = store.productIds.firstIndex(of: $1.id)
+                        {
                             return index1 < index2
                         }
                         return false
                     }
             }
-        })
+        }
         .padding(6)
-        .onAppear() {
+        .onAppear {
             loading = .loading
             error = nil
             Task {
