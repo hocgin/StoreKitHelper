@@ -39,7 +39,6 @@ public struct ProductsLoadList<Content: View>: View {
                     ProgressView().controlSize(.small)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(.background.opacity(0.73))
             }
         })
         .frame(minHeight: CGFloat(store.productIds.count) * 12)
