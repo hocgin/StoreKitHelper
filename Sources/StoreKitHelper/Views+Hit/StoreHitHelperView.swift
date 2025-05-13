@@ -77,7 +77,7 @@ public struct StoreHitHelperView: View {
                                 VStack(alignment: .leading) {
                                     Text("·付款:用户确认购买并付款后记入iTunes账户;")
                                     Text("·续费:会员到期前24小时，苹果会自动为您从iTunes账户扣费，成功后有效期自动顺延一个周期;")
-                                    Text("·取消续费:若需取消自动续费，请在到期前至少24小时手动在“iTunes/AppleID设置管理中关闭，关闭后不再扣费;")
+                                    Text("·取消续费:若需取消自动续费，请在到期前至少24小时手动在iTunes/AppleID设置管理中关闭，关闭后不再扣费;")
                                 }
                                 .font(.caption2)
                                 .foregroundStyle(.gray.opacity(0.75))
