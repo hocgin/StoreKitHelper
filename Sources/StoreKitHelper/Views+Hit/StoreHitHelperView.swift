@@ -81,7 +81,7 @@ public struct StoreHitHelperView: View {
                                 }
                                 .font(.caption2)
                                 .foregroundStyle(.gray.opacity(0.75))
-                                Spacer(minLength: .zero)
+                                Spacer(minLength: 4)
 
                                 RestorePurchasesButtonView(restoringPurchase: self.$restoringPurchase)
                                     .disabled(self.buyingProductID != nil)
