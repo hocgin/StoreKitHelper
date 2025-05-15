@@ -44,6 +44,12 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showStoreHitHelperView) {
             StoreHitHelperView()
+                .termsOfService {
+                    // Action triggered when the [Terms of Service] button is clicked
+                }
+                .privacyPolicy {
+                    // Action triggered when the [Privacy Policy] button is clicked
+                }
         }
     }
 

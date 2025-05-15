@@ -56,8 +56,9 @@ public struct StoreHitHelperView: View {
                     }
                     if self.store.hasNotPurchased {
                         VStack(spacing: .zero) {
-                            TermsOfServiceView()
-                            VStack {
+                            VStack(spacing: .zero) {
+                                TermsOfServiceView()
+//                                Spacer(minLength: .zero)
                                 ProductsLoadList(loading: self.$loadingProducts) {
                                     ProductsListView(
                                         buyingProductID: self.$buyingProductID,
@@ -71,7 +72,8 @@ public struct StoreHitHelperView: View {
                                     }
                                     .disabled(self.restoringPurchase)
                                 }
-                            }.padding(10)
+                                .fixedSize(horizontal: false, vertical: true)
+                            }
                             Spacer(minLength: .zero)
                             VStack {
                                 VStack(alignment: .leading) {
@@ -88,7 +90,7 @@ public struct StoreHitHelperView: View {
                                     .foregroundColor(self.primaryColor)
                                     .padding(.vertical)
                             }
-                            .padding(.top, 4)
+//                            .padding(.top, 4)
                             .padding(.horizontal, 4)
                         }
                         .frame(alignment: .bottom)

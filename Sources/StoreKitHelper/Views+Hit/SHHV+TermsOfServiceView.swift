@@ -24,25 +24,28 @@ extension StoreHitHelperView {
                     if let action = termsOfServiceHandle {
                         Button(action: action, label: {
                             let text = termsOfServiceLabel.isEmpty == true ? "terms_of_service".localized(locale: locale) : termsOfServiceLabel
-                            Text(text).frame(maxWidth: .infinity)
+                            Text(text)
                         })
                         .foregroundStyle(.white.opacity(0.8))
                     }
 
                     if let termsOfServiceHandle, let privacyPolicyHandle {
                         Text("&")
-                            .foregroundStyle(.white.opacity(0.3))
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white.opacity(0.5))
+                            .padding(.horizontal, 4)
                     }
 
                     if let action = privacyPolicyHandle {
                         Button(action: action, label: {
                             let text = privacyPolicyLabel.isEmpty == true ? "privacy_policy".localized(locale: locale) : privacyPolicyLabel
-                            Text(text).frame(maxWidth: .infinity)
+                            Text(text)
                         })
                         .foregroundStyle(.white.opacity(0.8))
                     }
                     Spacer()
                 }
+                .font(.footnote)
                 .padding(.horizontal, 8)
             }
         }
