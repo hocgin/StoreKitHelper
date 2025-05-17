@@ -54,7 +54,9 @@ public struct StoreHitHelperView: View {
                         self.vipViewRive.view().padding(50)
                         self.confettiViewRive.view()
                     }
-                    if self.store.hasNotPurchased {
+                    let hasNotPurchased = self.store.hasNotPurchased
+//                    let hasNotPurchased = false
+                    if hasNotPurchased {
                         VStack(spacing: .zero) {
                             VStack(spacing: .zero) {
                                 TermsOfServiceView()
@@ -101,6 +103,36 @@ public struct StoreHitHelperView: View {
                             ], startPoint: .top, endPoint: .bottom)
                         )
                     } else {
+//                        let color = LinearGradient(
+//                            colors: [.red, .yellow],
+//                            startPoint: .leading,
+//                            endPoint: .trailing
+//                        )
+//                        let cornerRadius = 6.0
+//                        Text("感谢您的支持")
+//                            .foregroundStyle(color.opacity(0.8))
+//                            .fontWeight(.bold)
+//                            .multilineTextAlignment(.center)
+//                            .padding(.horizontal, 8)
+//                            .padding(.vertical, 4)
+//                            .background(
+//                                Rectangle()
+//                                    .strokeBorder(.white.opacity(0.2))
+//                                    .background(.white.gradient.opacity(0.2))
+//                            )
+//                            .clipShape(
+//                                RoundedRectangle(
+//                                    cornerRadius: cornerRadius,
+//                                    style: .continuous
+//                                )
+//                            )
+//                            .overlay(
+//                                // 可选：白色描边
+//                                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+//                                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+//                            )
+//                            .frame(maxWidth: .infinity, alignment: .center)
+//                            .frame(maxHeight: .infinity, alignment: .top)
 //                        ExpiredDateView(expirationDate: expirationDate)
                     }
                 }
