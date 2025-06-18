@@ -133,7 +133,7 @@ extension StoreHitHelperView {
                             .padding(.horizontal, 4)
                             .background(Color.red)
                             .foregroundColor(.white)
-                            .cornerRadius(4)
+                            .cornerRadius(2)
                             .offset(x: 2, y: -2)
                     }
                 }
@@ -188,55 +188,63 @@ extension Product {
 
         switch offer.paymentMode {
         case .payAsYouGo:
-            var prefix = "首 \(offer.period.displayString)"
             if offer.period.value == 1 {
-                prefix = "首年"
+                return "首\(offer.period.unit.localDesc)仅需 \(formattedPrice)"
             }
-            return "\(prefix) \(formattedPrice)"
+            return "前\(offer.period.value)\(offer.period.unit.localDesc)仅需 \(formattedPrice)"
         case .payUpFront:
-            return "前 \(offer.period.displayString) 仅需 \(formattedPrice)"
+            if offer.period.value == 1 {
+                return "首\(offer.period.unit.localDesc)仅需 \(formattedPrice)"
+            }
+            return "前\(offer.period.value)\(offer.period.unit.localDesc)仅需 \(formattedPrice)"
         case .freeTrial:
-            return "\(offer.period.displayString)免费试用"
+            return "\(offer.period.value)\(offer.period.unit.localDesc)免费试用"
         default:
             return "限时优惠：\(formattedPrice)"
         }
     }
 }
 
-extension Product.SubscriptionPeriod {
-    var displayString: String {
-        switch unit {
-        case .day: return "\(value) 天"
-        case .week: return "\(value) 周"
-        case .month: return "\(value) 月"
-        case .year: return "\(value) 年"
-        @unknown default: return "\(value) 单位未知"
-        }
-    }
-}
+// extension Product.SubscriptionPeriod {
+//    var displayString: String {
+//        switch unit {
+//        case .day: return "\(value) 天"
+//        case .week: return value == 1 ? "首周" : "\(value) 周"
+//        case .month: return value == 1 ? "首月" : "\(value) 月"
+//        case .year: return value == 1 ? "首年" : "\(value) 年"
+//        @unknown default: return "\(value) 单位未知"
+//        }
+//    }
+// }
 
 extension Product.SubscriptionInfo {
     var displaySubscriptionPeriod: String? {
         let unit = subscriptionPeriod.unit
         let numberOfUnits = subscriptionPeriod.value
+        return "\(numberOfUnits) \(unit.localDesc)"
+    }
+}
 
-        switch unit {
+extension Product.SubscriptionPeriod.Unit {
+    var localDesc: String {
+        switch self {
         case .day:
-            return "\(numberOfUnits) 天"
+            return "天"
         case .week:
-            return "\(numberOfUnits) 周"
+            return "周"
         case .month:
-            return "\(numberOfUnits) 个月"
+            return "月"
         case .year:
-            return "\(numberOfUnits) 年"
+            return "年"
         default:
-            return "未知周期"
+            return ""
         }
     }
 }
 
 #Preview {
     VStack {
+        let _ = debugPrint("\(Product.SubscriptionPeriod.Unit.day.localizedDescription)")
         StoreHitHelperView.ProductsListLabelView(isBuying: .constant(false), productId: "", displayPrice: "2.0", displayName: "测试", description: "备注", hasPurchased: false, purchase: {})
         Text("¥10.00")
             .font(.system(size: 6))
