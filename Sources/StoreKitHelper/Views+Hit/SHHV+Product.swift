@@ -24,6 +24,7 @@ extension StoreHitHelperView {
                 let unit = product.subscription?.subscriptionPeriod.unit
                 let isBuying = buyingProductID == product.id
                 let hasPurchased = store.isProductPurchased(product)
+                let _ = debugPrint("products = \(store.products)")
                 if let filteredProducts = viewModel.filteredProducts {
                     let shouldDisplay = filteredProducts(product.id, product)
                     if shouldDisplay == true {
@@ -151,6 +152,7 @@ extension StoreHitHelperView {
 extension Product {
     var discountInfo: String? {
         // 首先尝试获取初始优惠
+//        subscription?.isEligibleForIntroOffer
         if let offer = subscription?.introductoryOffer {
             return formatDiscount(offer: offer, basePrice: price)
         }

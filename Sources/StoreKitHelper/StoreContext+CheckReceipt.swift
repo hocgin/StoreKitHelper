@@ -23,7 +23,7 @@ extension StoreContext {
             switch result {
             case let .verified(transaction):
                 if let transaction = try? await getValidTransaction(for: transaction.productID) {
-                    await self.updatePurchaseTransactions(with: transaction)
+                    await updatePurchaseTransactions(with: transaction)
                     hasValidTransaction = true
                 }
             case let .unverified(_, error):

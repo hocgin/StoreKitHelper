@@ -20,7 +20,7 @@ enum AppProduct: String, InAppProduct {
 struct ExampleApp: App {
     @StateObject var store = StoreContext(
         products: AppProduct.allCases
-    )
+    ) { debugPrint("StoreContext.hasNotPurchased \($0)") }
 
     var body: some Scene {
         WindowGroup {

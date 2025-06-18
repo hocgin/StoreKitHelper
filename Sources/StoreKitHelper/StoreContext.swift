@@ -5,65 +5,81 @@ import StoreKit
 
 public class StoreContext: ObservableObject, @unchecked Sendable {
     /// 更新
-    private var transactionUpdateTask: Task<Void, Never>? = nil
+    private var transactionUpdateTask: Task<Void, Never>?
     /**
-    已同步的产品列表。`用于缓存目的`
+     已同步的产品列表。`用于缓存目的`
 
-    您可以使用此属性来跟踪从 StoreKit 获取的产品集合。
+     您可以使用此属性来跟踪从 StoreKit 获取的产品集合。
 
-    由于 `Product` 不是 `Codable`，此属性无法持久化， 必须在应用启动时重新加载。
-     */
+     由于 `Product` 不是 `Codable`，此属性无法持久化， 必须在应用启动时重新加载。
+      */
     @Persisted(key: key("productIds"), defaultValue: [])
     private var persistedProductIds: [String]
+
     // MARK: - 产品列表 ID
+
     /// 产品列表 ID
     @Published public internal(set) var productIds: [String] = [] {
         willSet { persistedProductIds = newValue }
     }
+
     // MARK: - 产品列表
+
     /// 产品列表 -  更新 ``StoreContext/productIds`` ID，通过 ``StoreContext/updateProducts(_:)`` 更新产品列表
     @Published public var products: [Product] = []
     /**
-    购买的产品 ID 列表。`用于缓存目的`
+     购买的产品 ID 列表。`用于缓存目的`
 
-    您可以使用此属性来跟踪从 StoreKit 获取的已购买产品。
+     您可以使用此属性来跟踪从 StoreKit 获取的已购买产品。
 
-    此属性是持久化的，这意味着当 StoreKit 请求失败时，
-    您可以将这些 ID 映射到本地的产品表示。
-     */
+     此属性是持久化的，这意味着当 StoreKit 请求失败时，
+     您可以将这些 ID 映射到本地的产品表示。
+      */
     @Persisted(key: key("purchasedProductIds"), defaultValue: []) private var persistedPurchasedProductIds: [String]
+
     // MARK: - 已购买产品 ID
+
     /// 已购买的产品ID，限制 id 只能在模块中修改
     @Published public internal(set) var purchasedProductIds: [String] = [] {
         willSet { persistedPurchasedProductIds = newValue }
     }
+
     /// 购买交易，同时`更新`已购买的产品 ``StoreContext/purchasedProductIds`` ID
     public var purchaseTransactions: [Transaction] = [] {
         didSet {
             DispatchQueue.main.async {
                 self.purchasedProductIds = self.purchaseTransactions.map { $0.productID }
             }
+            onUpdatePurchased(hasNotPurchased)
         }
     }
-    
+
     /// 弹出 PopUp 显示产品支付界面
     /// 是否显示购买弹窗
     @Published public var isShowingPurchasePopup: Bool = false
     /// ``StoreContext/init(productIds:)``
-    public convenience init<Product: InAppProduct>(products: [Product]) {
-        self.init(productIds: products.map { $0.id })
+    public convenience init<Product: InAppProduct>(products: [Product], _ onUpdatePurchased: @escaping (Bool) -> Void = { _ in }) {
+        self.init(productIds: products.map { $0.id }, onUpdatePurchased: onUpdatePurchased)
     }
-    public init(productIds: [ProductID] = []) {
+
+    let onUpdatePurchased: (Bool) -> Void
+    public init(productIds: [ProductID] = [], onUpdatePurchased: @escaping (Bool) -> Void) {
+        self.onUpdatePurchased = onUpdatePurchased
         /// 产品 ID（持久化逻辑）
         self.productIds = productIds.count > 0 ? productIds : persistedProductIds
         /// `已购`产品 ID（持久化逻辑）
-        self.purchasedProductIds = persistedPurchasedProductIds
+        purchasedProductIds = persistedPurchasedProductIds
         transactionUpdateTask = updateTransactionsOnLaunch()
-        Task {
-            _ = await self.checkReceipt()
-            try await syncStoreData()
+        Task.detached(priority: .background) {
+            do {
+                _ = await self.checkReceipt()
+                try await self.syncStoreData()
+            } catch {
+                print("同步失败：\(error)")
+            }
         }
     }
+
     deinit {
         transactionUpdateTask?.cancel()
     }
@@ -71,13 +87,16 @@ public class StoreContext: ObservableObject, @unchecked Sendable {
 
 @MainActor public extension StoreContext {
     // MARK: - 恢复购买
+
     /// 恢复购买
     func restorePurchases() async throws {
         // 同步应用内购买信息
         try await AppStore.sync()
         try await updatePurchases()
     }
+
     // MARK: - 同步存储数据
+
     /// 同步存储数据
     func syncStoreData() async throws {
         let products = try await getProducts()
@@ -88,29 +107,36 @@ public class StoreContext: ObservableObject, @unchecked Sendable {
         /// 更新购买信息
         try await updatePurchases()
     }
+
     // MARK: - 更新购买信息
+
     /// 更新购买信息
     func updatePurchases() async throws {
         let transactions = try await getValidProductTransations()
         updatePurchaseTransactions(transactions)
     }
+
     // MARK: - 更新产品
+
     /// 更新产品
     func updateProducts(_ products: [Product]) {
         let productIdSet = Set(productIds)
         self.products = products.filter { productIdSet.contains($0.id) }
             .sorted {
                 if let index1 = productIds.firstIndex(of: $0.id),
-                   let index2 = productIds.firstIndex(of: $1.id) {
+                   let index2 = productIds.firstIndex(of: $1.id)
+                {
                     return index1 < index2
                 }
                 return false
             }
     }
+
     /// 更新购买交易 - 多条数据
     func updatePurchaseTransactions(_ transactions: [Transaction]) {
         purchaseTransactions = transactions
     }
+
     /// 更新交易记录 - 1条
     func updatePurchaseTransactions(with transaction: Transaction) {
         var transactions = purchaseTransactions.filter {
@@ -132,6 +158,7 @@ extension StoreContext {
         self.store = store
         self.defaultValue = defaultValue
     }
+
     private let key: String
     private let store: UserDefaults
     private let defaultValue: T
