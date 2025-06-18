@@ -34,6 +34,7 @@ extension StoreHitHelperView {
                             displayPrice: product.displayPrice,
                             displayName: product.displayName,
                             description: product.description,
+                            discount: product.discountInfo,
                             hasPurchased: hasPurchased
                         ) {
                             purchase(product: product)
@@ -49,6 +50,7 @@ extension StoreHitHelperView {
                         displayPrice: product.displayPrice,
                         displayName: product.displayName,
                         description: product.description,
+                        discount: product.discountInfo,
                         hasPurchased: hasPurchased
                     ) {
                         purchase(product: product)
@@ -100,28 +102,41 @@ extension StoreHitHelperView {
         var displayPrice: String
         var displayName: String
         var description: String
+        var discount: String?
         var hasPurchased: Bool
         var purchase: () -> Void
         var body: some View {
             Button { purchase() } label: {
-                HStack {
-                    if isBuying == true {
-                        ProgressView().controlSize(.mini)
-                    }
-                    VStack {
-                        Text(verbatim: displayName)
-                            .font(.headline)
-                        HStack(spacing: 2) {
-                            if let localizedDescription = unit?.localizedDescription {
-                                Text("\(displayPrice)") + Text(" / \(localizedDescription)").font(.system(size: 10))
-                            } else {
-                                Text("\(displayPrice)")
-                            }
+                ZStack(alignment: .topTrailing) {
+                    HStack {
+                        if isBuying == true {
+                            ProgressView().controlSize(.mini)
                         }
-                        .font(.footnote)
+                        VStack {
+                            Text(verbatim: displayName)
+                                .font(.headline)
+                            HStack(spacing: 2) {
+                                if let localizedDescription = unit?.localizedDescription {
+                                    Text("\(displayPrice)") + Text(" / \(localizedDescription)").font(.system(size: 10))
+                                } else {
+                                    Text("\(displayPrice)")
+                                }
+                            }
+                            .font(.footnote)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    if let discount {
+                        Text("\(discount)")
+                            .font(.caption2)
+                            .padding(.vertical, 2)
+                            .padding(.horizontal, 4)
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(4)
+                            .offset(x: 2, y: -2)
                     }
                 }
-                .frame(maxWidth: .infinity)
             }
             .buttonStyle(ProductButtonStyle())
             .tint(.white.opacity(0.4))
@@ -129,6 +144,73 @@ extension StoreHitHelperView {
             .padding(.vertical, 4)
             .padding(.horizontal, 8)
             .disabled(hasPurchased)
+        }
+    }
+}
+
+extension Product {
+    var discountInfo: String? {
+        // 首先尝试获取初始优惠
+        if let offer = subscription?.introductoryOffer {
+            return formatDiscount(offer: offer, basePrice: price)
+        }
+
+        // 如果没有初始优惠，可以选取 discounts（如 AdHocOffer）
+        if let offer = subscription?.promotionalOffers.first {
+            return formatDiscount(offer: offer, basePrice: price)
+        }
+
+        return nil // 没有可用优惠
+    }
+
+    var displayOfferPrice: String? {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = Locale.current
+        if let offer = subscription?.introductoryOffer {
+            return formatter.string(from: offer.price as NSNumber) ?? "\(offer.price)"
+        }
+
+        // 如果没有初始优惠，可以选取 discounts（如 AdHocOffer）
+        if let offer = subscription?.promotionalOffers.first {
+            return formatter.string(from: offer.price as NSNumber) ?? "\(offer.price)"
+        }
+        return nil // 没有可用优惠
+    }
+
+    func formatDiscount(offer: Product.SubscriptionOffer, basePrice: Decimal) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = Locale.current
+
+        let formattedPrice = formatter.string(from: offer.price as NSNumber) ?? "\(offer.price)"
+        let baseFormatted = formatter.string(from: basePrice as NSNumber) ?? "\(basePrice)"
+
+        switch offer.paymentMode {
+        case .payAsYouGo:
+            var prefix = "首 \(offer.period.displayString)"
+            if offer.period.value == 1 {
+                prefix = "首年"
+            }
+            return "\(prefix) \(formattedPrice)"
+        case .payUpFront:
+            return "前 \(offer.period.displayString) 仅需 \(formattedPrice)"
+        case .freeTrial:
+            return "\(offer.period.displayString)免费试用"
+        default:
+            return "限时优惠：\(formattedPrice)"
+        }
+    }
+}
+
+extension Product.SubscriptionPeriod {
+    var displayString: String {
+        switch unit {
+        case .day: return "\(value) 天"
+        case .week: return "\(value) 周"
+        case .month: return "\(value) 月"
+        case .year: return "\(value) 年"
+        @unknown default: return "\(value) 单位未知"
         }
     }
 }
@@ -151,4 +233,42 @@ extension Product.SubscriptionInfo {
             return "未知周期"
         }
     }
+}
+
+#Preview {
+    VStack {
+        StoreHitHelperView.ProductsListLabelView(isBuying: .constant(false), productId: "", displayPrice: "2.0", displayName: "测试", description: "备注", hasPurchased: false, purchase: {})
+        Text("¥10.00")
+            .font(.system(size: 6))
+            .strikethrough(true, color: .gray)
+            .foregroundStyle(.gray)
+            +
+            Text("¥1.00")
+
+            +
+            Text(" / Month").font(.system(size: 10))
+
+        Button {} label: {
+            VStack {
+                VStack {
+                    Text(verbatim: "专业版")
+                        .font(.headline)
+                    Text("¥1.00") + Text(" / Month").font(.system(size: 10))
+                }
+                .font(.footnote)
+                Text("¥10.00")
+                    .font(.system(size: 8))
+                    .strikethrough(true, color: .gray)
+                    .foregroundStyle(.gray)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(StoreHitHelperView.ProductButtonStyle())
+        .tint(.white.opacity(0.4))
+        .foregroundStyle(.primary)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 8)
+    }
+    .foregroundStyle(.white)
+//    .background(.black)
 }

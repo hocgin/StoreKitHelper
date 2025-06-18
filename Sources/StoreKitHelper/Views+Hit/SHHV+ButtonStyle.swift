@@ -19,11 +19,11 @@ extension StoreHitHelperView {
             configuration.label
                 .foregroundColor(.white)
                 .font(.headline)
-                .padding(getPadding())
+                .padding(.vertical, padding())
                 .font(getFontSize())
                 .background(background)
                 .cornerRadius(10)
-                .shadow(radius: 5)
+                .shadow(radius: 2)
 //                .background(
 //                    RoundedRectangle(cornerRadius: 10)
 //                )
@@ -32,14 +32,37 @@ extension StoreHitHelperView {
                     VStack {
                         if configuration.isPressed {
                             RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.white.opacity(0.3))
+                                .fill(Color.white.opacity(0.1))
                                 .blendMode(.hue)
                         }
                     }
                 )
-                .shadow(radius: configuration.isPressed ? 0 : 5, x: 0, y: configuration.isPressed ? 0 : 3)
+                .shadow(
+                    color: .black.opacity(0.1),
+                    radius: configuration.isPressed ? 1 : 5,
+                    x: 0,
+                    y: configuration.isPressed ? 0 : 3
+                )
                 .scaleEffect(configuration.isPressed ? 0.95 : 1)
                 .animation(.spring(), value: configuration.isPressed)
+        }
+
+        func padding() -> Double {
+            let unit: CGFloat = 4
+            switch controlSize {
+                case .regular:
+                    return unit * 2
+                case .large:
+                    return unit * 3
+                case .mini:
+                    return unit / 2
+                case .small:
+                    return unit
+                case .extraLarge:
+                    return unit
+                @unknown default:
+                    return unit
+            }
         }
 
         func getPadding() -> EdgeInsets {
