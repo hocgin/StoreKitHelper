@@ -50,6 +50,7 @@ public class StoreContext: ObservableObject, @unchecked Sendable {
             DispatchQueue.main.async {
                 self.purchasedProductIds = self.purchaseTransactions.map { $0.productID }
             }
+            guard !productIds.isEmpty else { return }
             onUpdatePurchased(hasNotPurchased)
         }
     }
